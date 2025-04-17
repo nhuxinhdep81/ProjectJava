@@ -1,9 +1,6 @@
 package ra.edu.business.config;
 
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class ConnectionDB {
     private static final String URl = "jdbc:mysql://localhost:3306/course_management_system";
@@ -20,7 +17,7 @@ public class ConnectionDB {
         return conn;
     }
 
-    public static void closeConnection(Connection conn, CallableStatement callSt) {
+    public static void closeConnection(Connection conn, CallableStatement callSt, ResultSet rs) {
         if (conn != null) {
             try {
                 conn.close();

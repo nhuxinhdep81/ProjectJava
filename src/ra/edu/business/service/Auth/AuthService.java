@@ -1,4 +1,6 @@
 package ra.edu.business.service.Auth;
 
-public class AuthService {
+public interface AuthService {
+    Object login(String username, String password);
+
 }

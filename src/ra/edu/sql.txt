@@ -1,54 +1,63 @@
--- Tạo database
 create database if not exists course_management_system;
 use course_management_system;
 
--- Bảng Admin
-create table Admin (
-    id int auto_increment primary key,
-    username varchar(50) not null unique,
-    password varchar(255) not null
+create table admin (
+                       id int primary key auto_increment,
+                       username varchar(50) not null unique,
+                       password varchar(255) not null
 );
 
--- Bảng Học viên
-create table Student (
-    id int auto_increment primary key,
-    student_id varchar(50) not null unique,
-    username varchar(50) not null unique,
-    password varchar(255) not null,
-    full_name varchar(100) not null,
-    email varchar(100) not null unique,
-    sex bit,
-    phone varchar(20),
-    created_at timestamp default current_timestamp
+create table student (
+                         student_id char(5) primary key,
+                         name varchar(100) not null,
+                         dob date not null,
+                         email varchar(100) not null unique,
+                         sex bit not null,
+                         phone varchar(20),
+                         password varchar(255) not null,
+                         create_at date default (current_date)
 );
 
--- Bảng Khóa học
-create table Course (
-    id int auto_increment primary key,
-    course_id varchar(50) not null unique,
-    name varchar(100) not null,
-    description text,
-    duration int not null,
-    instructor varchar(100) not null,
-    created_by int not null,
-    created_at timestamp default current_timestamp,
-    updated_at timestamp default current_timestamp on update current_timestamp,
-    foreign key (created_by) references Admin(id)
+create table course (
+                        course_id char(5) primary key,
+                        name varchar(100) not null,
+                        duration int not null,
+                        instructor varchar(100) not null,
+                        create_at date default (current_date)
 );
 
--- Bảng Đăng ký khóa học
-create table Enrollment (
-    id int auto_increment primary key,
-    enrollment_id varchar(50) not null unique,
-    student_id varchar(50) not null,
-    course_id varchar(50) not null,
-    registration_date timestamp default current_timestamp,
-    status enum('waiting', 'denied', 'cancel', 'confirm') default 'waiting',
-    approved_by int,
-    approved_at timestamp null,
-    foreign key (student_id) references Student(student_id),
-    foreign key (course_id) references Course(course_id),
-    foreign key (approved_by) references Admin(id)
+create table enrollment (
+                            id int primary key auto_increment,
+                            student_id char(5) not null,
+                            course_id char(5) not null,
+                            registered_at datetime default current_timestamp,
+                            status enum('waiting','denied','cancer','confirm') default 'waiting',
+                            foreign key (student_id) references student(student_id),
+                            foreign key (course_id) references course(course_id)
 );
-alter table Enrollment
-add constraint unique_enrollment unique (student_id, course_id);
+
+DELIMITER //
+
+-- Procedure kiểm tra đăng nhập admin
+CREATE PROCEDURE check_admin_login(
+    IN p_username VARCHAR(50),
+    IN p_password VARCHAR(255)
+)
+BEGIN
+    SELECT id, username, password
+    FROM admin
+    WHERE username = p_username AND password = p_password;
+END //
+
+-- Procedure kiểm tra đăng nhập student
+CREATE PROCEDURE check_student_login(
+    IN p_email VARCHAR(100),
+    IN p_password VARCHAR(255)
+)
+BEGIN
+    SELECT student_id, name, dob, email, sex, phone, password, create_at
+    FROM student
+    WHERE email = p_email AND password = p_password;
+END //
+
+DELIMITER ;

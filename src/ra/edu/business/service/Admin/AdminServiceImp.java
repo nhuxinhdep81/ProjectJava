@@ -1,4 +1,7 @@
 package ra.edu.business.service.Admin;
 
-public class AdminServiceImp {
+
+public class AdminServiceImp implements AdminService {
+
+
 }
