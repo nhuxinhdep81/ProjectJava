@@ -26,7 +26,7 @@ public class AuthDaoImp implements AuthDao {
             rs = callSt.executeQuery();
             if (rs.next()) {
                 Student student = new Student();
-                student.setId(rs.getString("id"));
+                student.setId(rs.getString("student_id"));
                 student.setName(rs.getString("name"));
                 student.setDob(LocalDate.parse(rs.getString("dob")));
                 student.setEmail(rs.getString("email"));
@@ -74,6 +74,7 @@ public class AuthDaoImp implements AuthDao {
     public List findAll() {
         return List.of();
     }
+
 
     @Override
     public boolean save(Object o) {

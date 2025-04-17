@@ -1,5 +1,7 @@
 package ra.edu.presentation.Admin;
 
+import ra.edu.presentation.Course.CourseUI;
+
 import java.util.Scanner;
 
 public class AdminUI {
@@ -22,6 +24,7 @@ public class AdminUI {
             switch (choice) {
                 case 1:
                     System.out.println(" Quản lý khóa học");
+                    CourseUI.displayCourseUI();
                     break;
                 case 2:
                     System.out.println(" Quản lý học viên");

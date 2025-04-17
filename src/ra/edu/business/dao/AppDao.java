@@ -1,7 +1,7 @@
 package ra.edu.business.dao;
 
 import java.util.List;
-import java.util.Scanner;
+
 
 public interface AppDao<T> {
     List<T> findAll();
