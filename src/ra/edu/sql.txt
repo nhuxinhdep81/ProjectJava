@@ -1,39 +1,38 @@
-create database if not exists course_management_system;
-use course_management_system;
-
-create table admin (
-                       id int primary key auto_increment,
-                       username varchar(50) not null unique,
-                       password varchar(255) not null
+CREATE DATABASE IF NOT EXISTS course_management_system;
+USE course_management_system;
+CREATE TABLE admin (
+                       id INT PRIMARY KEY AUTO_INCREMENT,
+                       username VARCHAR(50) NOT NULL UNIQUE,
+                       password VARCHAR(255) NOT NULL
 );
 
-create table student (
-                         student_id char(5) primary key,
-                         name varchar(100) not null,
-                         dob date not null,
-                         email varchar(100) not null unique,
-                         sex bit not null,
-                         phone varchar(20),
-                         password varchar(255) not null,
-                         create_at date default (current_date)
+CREATE TABLE student (
+                         student_id CHAR(5) PRIMARY KEY,
+                         name VARCHAR(100) NOT NULL,
+                         dob DATE NOT NULL,
+                         email VARCHAR(100) NOT NULL UNIQUE,
+                         sex BIT NOT NULL,
+                         phone VARCHAR(20),
+                         password VARCHAR(255) NOT NULL,
+                         create_at DATE DEFAULT (CURRENT_DATE)
 );
 
-create table course (
-                        course_id char(5) primary key,
-                        name varchar(100) not null,
-                        duration int not null,
-                        instructor varchar(100) not null,
-                        create_at date default (current_date)
+CREATE TABLE course (
+                        course_id CHAR(5) PRIMARY KEY,
+                        name VARCHAR(100) NOT NULL,
+                        duration INT NOT NULL,
+                        instructor VARCHAR(100) NOT NULL,
+                        create_at DATE DEFAULT (CURRENT_DATE)
 );
 
-create table enrollment (
-                            id int primary key auto_increment,
-                            student_id char(5) not null,
-                            course_id char(5) not null,
-                            registered_at datetime default current_timestamp,
-                            status enum('waiting','denied','cancer','confirm') default 'waiting',
-                            foreign key (student_id) references student(student_id),
-                            foreign key (course_id) references course(course_id)
+CREATE TABLE enrollment (
+                            id INT PRIMARY KEY AUTO_INCREMENT,
+                            student_id CHAR(5) NOT NULL,
+                            course_id CHAR(5) NOT NULL,
+                            registered_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                            status ENUM('waiting','denied','cancer','confirm') DEFAULT 'waiting',
+                            FOREIGN KEY (student_id) REFERENCES student(student_id),
+                            FOREIGN KEY (course_id) REFERENCES course(course_id)
 );
 
 DELIMITER //
@@ -60,4 +59,75 @@ BEGIN
     WHERE email = p_email AND password = p_password;
 END //
 
+-- Procedure hiển thị danh sách khóa học với phân trang
+CREATE PROCEDURE get_courses_pagination(
+    IN p_page INT
+)
+BEGIN
+    DECLARE v_offset INT;
+    SET v_offset = (p_page - 1) * 5;
+    SELECT course_id, name, duration, instructor, create_at
+    FROM course
+    LIMIT 5 OFFSET v_offset;
+END //
+
+-- Procedure thêm khóa học mới
+CREATE PROCEDURE add_course(
+    IN p_course_id CHAR(5),
+    IN p_name VARCHAR(100),
+    IN p_duration INT,
+    IN p_instructor VARCHAR(100),
+    IN p_create_at DATE
+)
+BEGIN
+    INSERT INTO course (course_id, name, duration, instructor, create_at)
+    VALUES (p_course_id, p_name, p_duration, p_instructor, p_create_at);
+END //
+
+-- Procedure cập nhật khóa học
+CREATE PROCEDURE update_course(
+    IN p_course_id CHAR(5),
+    IN p_name VARCHAR(100),
+    IN p_duration INT,
+    IN p_instructor VARCHAR(100)
+)
+BEGIN
+    UPDATE course
+    SET name = p_name, duration = p_duration, instructor = p_instructor
+    WHERE course_id = p_course_id;
+END //
+
+-- Procedure tìm khóa học theo ID
+CREATE PROCEDURE find_course_by_id(
+    IN p_course_id CHAR(5)
+)
+BEGIN
+    SELECT course_id, name, duration, instructor, create_at
+    FROM course
+    WHERE course_id = p_course_id;
+END //
+
 DELIMITER ;
+
+-- Insert sample data
+INSERT INTO admin (id, username, password)
+VALUES (1, 'admin01', '123456');
+
+INSERT INTO student (
+    student_id, name, dob, email, sex, phone, password
+)
+VALUES (
+           'S0001', 'Nguyen Van A', STR_TO_DATE('15/04/2002', '%d/%m/%Y'),
+           'vana@gmail.com', 1, '0912345678', 'abc123'
+       );
+
+-- Insert sample courses for testing pagination
+INSERT INTO course (course_id, name, duration, instructor, create_at)
+VALUES
+    ('C0001', 'Java Programming', 30, 'Dr. Smith', '2025-01-01'),
+    ('C0002', 'Python Basics', 20, 'Prof. Johnson', '2025-01-02'),
+    ('C0003', 'Web Development', 25, 'Ms. Brown', '2025-01-03'),
+    ('C0004', 'Database Systems', 35, 'Mr. Lee', '2025-01-04'),
+    ('C0005', 'Machine Learning', 40, 'Dr. Kim', '2025-01-05'),
+    ('C0006', 'Data Science', 28, 'Prof. Davis', '2025-01-06'),
+    ('C0007', 'Cloud Computing', 32, 'Ms. Wilson', '2025-01-07');

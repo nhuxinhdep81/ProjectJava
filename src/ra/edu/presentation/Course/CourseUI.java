@@ -14,6 +14,7 @@ import java.util.Scanner;
 public class CourseUI {
     private static Scanner scanner = new Scanner(System.in);
     private static final CourseService courseService = new CourseServiceImp(new CourseDaoImp());
+    private static final CourseValidator courseValidator = new CourseValidator(courseService);
 
     // Mã màu ANSI
     public static final String RESET = "\u001B[0m";
@@ -53,18 +54,22 @@ public class CourseUI {
                         editCourse();
                         break;
                     case 4:
+                        deleteCourse();
+                        break;
                     case 5:
+                        searchCoursesByName();
+                        break;
                     case 6:
-                        System.out.println(YELLOW + "Chức năng chưa được triển khai." + RESET);
+                        sortCourses();
                         break;
                     case 7:
-                        System.out.println(YELLOW + " Quay về menu chính..." + RESET);
+                        System.out.println(YELLOW + "Quay về menu chính..." + RESET);
                         break;
                     default:
-                        System.out.println(RED + " Lựa chọn không hợp lệ. Vui lòng chọn từ 1 đến 7!" + RESET);
+                        System.out.println(RED + "Lựa chọn không hợp lệ. Vui lòng chọn từ 1 đến 7!" + RESET);
                 }
             } catch (NumberFormatException e) {
-                System.out.println(RED + " Vui lòng nhập số nguyên từ 1 đến 7!" + RESET);
+                System.out.println(RED + "Vui lòng nhập số nguyên từ 1 đến 7!" + RESET);
                 choice = -1;
             }
         } while (choice != 7);
@@ -72,53 +77,23 @@ public class CourseUI {
 
     private static void displayCoursesWithPagination() {
         int page = 1;
+        int totalPages = courseService.countCourses();
         while (true) {
             List<Course> courses = courseService.getCoursesByPage(page);
-            if (courses.isEmpty()) {
-                System.out.println(YELLOW + "Không có khóa học nào ở trang " + page + "." + RESET);
-                if (page > 1) page--;
-                else break;
-            } else {
-                System.out.println(CYAN + "\nDanh sách khóa học (Trang " + page + "):" + RESET);
-                System.out.println("----------------------------------------------------------------------");
-                System.out.printf("%-10s %-20s %-10s %-20s %-15s\n",
-                        "ID", "Tên khóa học", "Thời lượng", "Giảng viên", "Ngày tạo");
-                System.out.println("----------------------------------------------------------------------");
-                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-                for (Course course : courses) {
-                    System.out.printf("%-10s %-20s %-10d %-20s %-15s\n",
-                            course.getCourseId(),
-                            course.getName(),
-                            course.getDuration(),
-                            course.getInstructor(),
-                            course.getCreateAt().format(dtf));
-                }
-                System.out.println("--------------------------------------------------");
-            }
-            System.out.print(GREEN + "Nhấn 'n' để xem trang tiếp theo, 'p' để quay lại, hoặc 'q' để thoát: " + RESET);
-            String input = scanner.nextLine().toLowerCase();
-            if (input.equals("n")) page++;
-            else if (input.equals("p") && page > 1) page--;
-            else if (input.equals("q")) break;
-            else System.out.println(RED + "Lựa chọn không hợp lệ!" + RESET);
+            displayCourseList(courses, page, totalPages, "Danh sách khóa học");
+            page = handlePaginationInput(page, totalPages);
+            if (page == -1) break;
         }
     }
 
     private static void addNewCourse() {
         System.out.println(CYAN + "\nThêm mới khóa học:" + RESET);
-        String courseId;
-        while (true) {
-            System.out.print("Nhập mã khóa học (CXXXX): ");
-            courseId = scanner.nextLine();
-            if (courseId.matches("C\\d{4}") && courseService.findCourseById(courseId) == null) break;
-            System.out.println(RED + "Mã khóa học không hợp lệ hoặc đã tồn tại!" + RESET);
-        }
-        String name = CourseValidator.validateCourseName(scanner);
-        int duration = CourseValidator.validateDuration(scanner);
-        String instructor = CourseValidator.validateInstructor(scanner);
-        LocalDate createAt = LocalDate.now(); // Use current date
+        String name = courseValidator.validateCourseName(scanner);
+        int duration = courseValidator.validateDuration(scanner);
+        String instructor = courseValidator.validateInstructor(scanner);
+        LocalDate createAt = LocalDate.now();
 
-        Course course = new Course(courseId, name, duration, instructor, createAt);
+        Course course = new Course(0, name, duration, instructor, createAt);
         if (courseService.addCourse(course)) {
             System.out.println(GREEN + "Thêm khóa học thành công!" + RESET);
         } else {
@@ -128,17 +103,23 @@ public class CourseUI {
 
     private static void editCourse() {
         System.out.println(CYAN + "\nChỉnh sửa thông tin khóa học:" + RESET);
-        System.out.print("Nhập mã khóa học (CXXXX): ");
-        String courseId = scanner.nextLine();
+        System.out.print("Nhập ID khóa học: ");
+        int courseId;
+        try {
+            courseId = Integer.parseInt(scanner.nextLine());
+        } catch (NumberFormatException e) {
+            System.out.println(RED + "ID khóa học phải là số nguyên!" + RESET);
+            return;
+        }
         Course course = courseService.findCourseById(courseId);
         if (course == null) {
-            System.out.println(RED + "Không tìm thấy khóa học với mã " + courseId + "!" + RESET);
+            System.out.println(RED + "Không tìm thấy khóa học với ID " + courseId + "!" + RESET);
             return;
         }
 
         System.out.println(CYAN + "\nThông tin khóa học:" + RESET);
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        System.out.printf("ID: %s, Tên: %s, Thời lượng: %d, Giảng viên: %s, Ngày tạo: %s\n",
+        System.out.printf("ID: %d, Tên: %s, Thời lượng: %d, Giảng viên: %s, Ngày tạo: %s\n",
                 course.getCourseId(), course.getName(), course.getDuration(),
                 course.getInstructor(), course.getCreateAt().format(dtf));
 
@@ -158,13 +139,13 @@ public class CourseUI {
                 choice = Integer.parseInt(scanner.nextLine());
                 switch (choice) {
                     case 1:
-                        course.setName(CourseValidator.validateCourseName(scanner));
+                        course.setName(courseValidator.validateCourseNameForUpdate(scanner, course.getCourseId()));
                         break;
                     case 2:
-                        course.setDuration(CourseValidator.validateDuration(scanner));
+                        course.setDuration(courseValidator.validateDuration(scanner));
                         break;
                     case 3:
-                        course.setInstructor(CourseValidator.validateInstructor(scanner));
+                        course.setInstructor(courseValidator.validateInstructor(scanner));
                         break;
                     case 4:
                         if (courseService.updateCourse(course)) {
@@ -180,5 +161,205 @@ public class CourseUI {
                 System.out.println(RED + "Vui lòng nhập số nguyên từ 1 đến 4!" + RESET);
             }
         } while (true);
+    }
+
+    private static void deleteCourse() {
+        System.out.println(CYAN + "\nXóa khóa học:" + RESET);
+        System.out.print("Nhập ID khóa học: ");
+        int courseId;
+        try {
+            courseId = Integer.parseInt(scanner.nextLine());
+        } catch (NumberFormatException e) {
+            System.out.println(RED + "ID khóa học phải là số nguyên!" + RESET);
+            return;
+        }
+        Course course = courseService.findCourseById(courseId);
+        if (course == null) {
+            System.out.println(RED + "Không tìm thấy khóa học với ID " + courseId + "!" + RESET);
+            return;
+        }
+
+        System.out.println(CYAN + "\nThông tin khóa học:" + RESET);
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        System.out.printf("ID: %d, Tên: %s, Thời lượng: %d, Giảng viên: %s, Ngày tạo: %s\n",
+                course.getCourseId(), course.getName(), course.getDuration(),
+                course.getInstructor(), course.getCreateAt().format(dtf));
+        System.out.print(YELLOW + "Bạn có chắc chắn muốn xóa khóa học này? (1 để xác nhận, 0 để hủy): " + RESET);
+        String confirm;
+        try {
+            confirm = scanner.nextLine().trim();
+            if (!confirm.equals("1") && !confirm.equals("0")) {
+                System.out.println(RED + "Vui lòng nhập 1 hoặc 0!" + RESET);
+                return;
+            }
+        } catch (Exception e) {
+            System.out.println(RED + "Lựa chọn không hợp lệ!" + RESET);
+            return;
+        }
+
+        if (confirm.equals("1")) {
+            if (courseService.deleteCourseById(courseId)) {
+                System.out.println(GREEN + "Xóa khóa học thành công!" + RESET);
+            } else {
+                System.out.println(RED + "Xóa khóa học thất bại!" + RESET);
+            }
+        } else {
+            System.out.println(YELLOW + "Hủy xóa khóa học." + RESET);
+        }
+    }
+
+    private static void searchCoursesByName() {
+        System.out.println(CYAN + "\nTìm kiếm khóa học theo tên:" + RESET);
+        System.out.print("Nhập tên khóa học (hoặc một phần): ");
+        String searchName = scanner.nextLine().trim();
+        if (searchName.isEmpty()) {
+            System.out.println(RED + "Tên tìm kiếm không được để trống!" + RESET);
+            return;
+        }
+
+        int page = 1;
+        int totalPages = courseService.countCoursesByName(searchName);
+        while (true) {
+            List<Course> courses = courseService.searchByName(searchName, page);
+            displayCourseList(courses, page, totalPages, "Kết quả tìm kiếm cho \"" + searchName + "\"");
+            page = handlePaginationInput(page, totalPages);
+            if (page == -1) break;
+        }
+    }
+
+    private static void sortCourses() {
+        System.out.println(CYAN + "\nSắp xếp danh sách khóa học:" + RESET);
+        int fieldChoice;
+        String field = "";
+        do {
+            System.out.println(PURPLE + "\n╔═══════════════════════════════╗");
+            System.out.println("║ " + CYAN + "Chọn tiêu chí sắp xếp" + PURPLE + "         ║");
+            System.out.println("╠═══════════════════════════════╣");
+            System.out.println("║ " + CYAN + "1. Theo tên khóa học" + PURPLE + "           ║");
+            System.out.println("║ " + CYAN + "2. Theo ID khóa học" + PURPLE + "            ║");
+            System.out.println("║ " + CYAN + "3. Quay lại" + PURPLE + "                    ║");
+            System.out.println("╚═══════════════════════════════╝" + RESET);
+            System.out.print(GREEN + "→ Mời bạn chọn (1-3): " + RESET);
+
+            try {
+                fieldChoice = Integer.parseInt(scanner.nextLine());
+                switch (fieldChoice) {
+                    case 1:
+                        field = "name";
+                        break;
+                    case 2:
+                        field = "course_id";
+                        break;
+                    case 3:
+                        return;
+                    default:
+                        System.out.println(RED + "Lựa chọn không hợp lệ!" + RESET);
+                        continue;
+                }
+                break;
+            } catch (NumberFormatException e) {
+                System.out.println(RED + "Vui lòng nhập số nguyên từ 1 đến 3!" + RESET);
+            }
+        } while (true);
+
+        int orderChoice;
+        String order = "";
+        do {
+            System.out.println(PURPLE + "\n╔═══════════════════════════════╗");
+            System.out.println("║ " + CYAN + "Chọn thứ tự sắp xếp" + PURPLE + "           ║");
+            System.out.println("╠═══════════════════════════════╣");
+            System.out.println("║ " + CYAN + "1. Tăng dần" + PURPLE + "                    ║");
+            System.out.println("║ " + CYAN + "2. Giảm dần" + PURPLE + "                    ║");
+            System.out.println("║ " + CYAN + "3. Quay lại" + PURPLE + "                    ║");
+            System.out.println("╚═══════════════════════════════╝" + RESET);
+            System.out.print(GREEN + "→ Mời bạn chọn (1-3): " + RESET);
+
+            try {
+                orderChoice = Integer.parseInt(scanner.nextLine());
+                switch (orderChoice) {
+                    case 1:
+                        order = "ASC";
+                        break;
+                    case 2:
+                        order = "DESC";
+                        break;
+                    case 3:
+                        return;
+                    default:
+                        System.out.println(RED + "Lựa chọn không hợp lệ!" + RESET);
+                        continue;
+                }
+                break;
+            } catch (NumberFormatException e) {
+                System.out.println(RED + "Vui lòng nhập số nguyên từ 1 đến 3!" + RESET);
+            }
+        } while (true);
+
+        int page = 1;
+        int totalPages = courseService.countCourses();
+        while (true) {
+            List<Course> courses = courseService.sortByField(field, order, page);
+            String sortDesc = "Sắp xếp theo " + (field.equals("name") ? "tên" : "ID") + " (" + (order.equals("ASC") ? "tăng dần" : "giảm dần") + ")";
+            displayCourseList(courses, page, totalPages, sortDesc);
+            page = handlePaginationInput(page, totalPages);
+            if (page == -1) break;
+        }
+    }
+
+    private static void displayCourseList(List<Course> courses, int page, int totalPages, String title) {
+        if (courses.isEmpty()) {
+            System.out.println(YELLOW + "Không có khóa học nào ở trang " + page + "." + RESET);
+        } else {
+            System.out.println(CYAN + "\n" + title + " (Trang " + page + "/" + totalPages + "):" + RESET);
+            System.out.println("----------------------------------------------------------------------");
+            System.out.printf("%-10s %-20s %-10s %-20s %-15s\n",
+                    "ID", "Tên khóa học", "Thời lượng", "Giảng viên", "Ngày tạo");
+            System.out.println("----------------------------------------------------------------------");
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            for (Course course : courses) {
+                System.out.printf("%-10d %-20s %-10d %-20s %-15s\n",
+                        course.getCourseId(),
+                        course.getName(),
+                        course.getDuration(),
+                        course.getInstructor(),
+                        course.getCreateAt().format(dtf));
+            }
+            System.out.println("----------------------------------------------------------------------");
+        }
+        System.out.print(YELLOW + "Trang: ");
+        for (int i = 1; i <= totalPages; i++) {
+            if (i == page) {
+                System.out.print("[" + i + "] ");
+            } else {
+                System.out.print(i + " ");
+            }
+        }
+        System.out.println(RESET);
+    }
+
+    private static int handlePaginationInput(int currentPage, int totalPages) {
+        System.out.println(GREEN + "Nhấn 'n' để xem trang tiếp theo, 'p' để quay lại, 'q' để thoát," + RESET);
+        System.out.print(GREEN + "hoặc nhập số trang (1-" + totalPages + "): " + RESET);
+        String input = scanner.nextLine().trim().toLowerCase();
+        if (input.equals("n") && currentPage < totalPages) {
+            return currentPage + 1;
+        } else if (input.equals("p") && currentPage > 1) {
+            return currentPage - 1;
+        } else if (input.equals("q")) {
+            return -1;
+        } else {
+            try {
+                int page = Integer.parseInt(input);
+                if (page >= 1 && page <= totalPages) {
+                    return page;
+                } else {
+                    System.out.println(RED + "Trang phải từ 1 đến " + totalPages + "!" + RESET);
+                    return currentPage;
+                }
+            } catch (NumberFormatException e) {
+                System.out.println(RED + "Lựa chọn không hợp lệ!" + RESET);
+                return currentPage;
+            }
+        }
     }
 }

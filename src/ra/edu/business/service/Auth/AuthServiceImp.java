@@ -5,7 +5,6 @@ import ra.edu.business.dao.Auth.AuthDaoImp;
 import ra.edu.business.model.Admin;
 import ra.edu.business.model.Student;
 
-
 public class AuthServiceImp implements AuthService {
     private static Object currentUser = null;
     private final AuthDao authDAO = new AuthDaoImp();
@@ -25,4 +24,11 @@ public class AuthServiceImp implements AuthService {
         return null;
     }
 
+    @Override
+    public boolean registerStudent(Student student) {
+        if (student == null || student.getEmail() == null || student.getPassword() == null) {
+            return false;
+        }
+        return authDAO.registerStudent(student);
+    }
 }

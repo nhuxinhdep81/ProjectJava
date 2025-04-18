@@ -3,7 +3,7 @@ package ra.edu.business.model;
 import java.time.LocalDate;
 
 public class Student {
-    private String id;
+    private int id;
     private String name;
     private LocalDate dob;
     private String email;
@@ -11,12 +11,12 @@ public class Student {
     private String phone;
     private String password;
     private LocalDate createAt;
+    private boolean isActived;
 
     public Student() {
     }
 
-
-    public Student(String id, String name, LocalDate dob, String email, boolean sex, String phone, String password, LocalDate createAt) {
+    public Student(int id, String name, LocalDate dob, String email, boolean sex, String phone, String password, LocalDate createAt, boolean isActived) {
         this.id = id;
         this.name = name;
         this.dob = dob;
@@ -25,13 +25,14 @@ public class Student {
         this.phone = phone;
         this.password = password;
         this.createAt = createAt;
+        this.isActived = isActived;
     }
 
-    public String getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -89,5 +90,13 @@ public class Student {
 
     public void setCreateAt(LocalDate createAt) {
         this.createAt = createAt;
+    }
+
+    public boolean isActived() {
+        return isActived;
+    }
+
+    public void setActived(boolean actived) {
+        isActived = actived;
     }
 }

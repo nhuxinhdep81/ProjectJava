@@ -5,7 +5,7 @@ import ra.edu.business.model.Admin;
 import ra.edu.business.model.Student;
 
 public interface AuthDao extends AppDao {
-    Student studentLogin(String username, String password);
+    Student studentLogin(String email, String password);
     Admin adminLogin(String username, String password);
-
+    boolean registerStudent(Student student);
 }

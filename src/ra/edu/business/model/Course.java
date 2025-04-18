@@ -3,7 +3,7 @@ package ra.edu.business.model;
 import java.time.LocalDate;
 
 public class Course {
-    private String courseId;
+    private int courseId;
     private String name;
     private int duration;
     private String instructor;
@@ -12,7 +12,7 @@ public class Course {
     public Course() {
     }
 
-    public Course(String courseId, String name, int duration, String instructor, LocalDate createAt) {
+    public Course(int courseId, String name, int duration, String instructor, LocalDate createAt) {
         this.courseId = courseId;
         this.name = name;
         this.duration = duration;
@@ -20,11 +20,11 @@ public class Course {
         this.createAt = createAt;
     }
 
-    public String getCourseId() {
+    public int getCourseId() {
         return courseId;
     }
 
-    public void setCourseId(String courseId) {
+    public void setCourseId(int courseId) {
         this.courseId = courseId;
     }
 
