@@ -42,7 +42,16 @@ public class LoginUI {
 
             Object user = authService.login(username, password);
             if (user == null) {
-                System.out.println(RED + "Đăng nhập thất bại. Tên đăng nhập/email hoặc mật khẩu không đúng." + RESET);
+                if (role == 1) {
+                    System.out.println(RED + "Đăng nhập thất bại. Tên đăng nhập hoặc mật khẩu không đúng." + RESET);
+                } else {
+                    // Kiểm tra trạng thái tài khoản học viên
+                    if (authService.isStudentDeactivated(username)) {
+                        System.out.println(RED + "Đăng nhập thất bại. Tài khoản của bạn đã bị vô hiệu hóa." + RESET);
+                    } else {
+                        System.out.println(RED + "Đăng nhập thất bại. Email hoặc mật khẩu không đúng." + RESET);
+                    }
+                }
             } else {
                 loggedIn = true;
                 if (role == 1 && user instanceof Admin) {
@@ -50,9 +59,13 @@ public class LoginUI {
                     AdminUI.displayMenuAdmin();
                 } else if (role == 2 && user instanceof Student) {
                     System.out.println(GREEN + "Chào mừng Học viên!" + RESET);
-                    StudentUI.displayMenuStudent();
+                    StudentUI.displayStudentMenu((Student) user);
                 } else {
-                    System.out.println(RED + "Tài khoản không thuộc vai trò đã chọn. Vui lòng thử lại." + RESET);
+                    if (role == 1) {
+                        System.out.println(RED + "Tài khoản này là tài khoản học viên, không phải quản trị viên. Vui lòng chọn vai trò học viên để đăng nhập." + RESET);
+                    } else {
+                        System.out.println(RED + "Tài khoản này là tài khoản quản trị viên, không phải học viên. Vui lòng chọn vai trò quản trị viên để đăng nhập." + RESET);
+                    }
                     loggedIn = false;
                 }
             }

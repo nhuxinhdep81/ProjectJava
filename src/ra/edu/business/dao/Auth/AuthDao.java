@@ -8,4 +8,5 @@ public interface AuthDao extends AppDao {
     Student studentLogin(String email, String password);
     Admin adminLogin(String username, String password);
     boolean registerStudent(Student student);
+    boolean isStudentDeactivated(String email); // Thêm phương thức mới
 }

@@ -6,6 +6,9 @@ import ra.edu.business.service.Course.CourseServiceImp;
 import ra.edu.business.dao.Course.CourseDaoImp;
 import ra.edu.validate.Course.CourseValidator;
 
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -28,17 +31,17 @@ public class CourseUI {
     public static void displayCourseUI() {
         int choice;
         do {
-            System.out.println(PURPLE + "\n╔═════════════════════════════════════════════╗");
-            System.out.println("║           " + YELLOW + "   QUẢN LÝ KHÓA HỌC" + PURPLE + "               ║");
-            System.out.println("╠═════════════════════════════════════════════╣");
-            System.out.println("║ " + CYAN + "1. Hiển thị danh sách khóa học" + PURPLE + "              ║");
-            System.out.println("║ " + CYAN + "2. Thêm mới khóa học" + PURPLE + "                        ║");
-            System.out.println("║ " + CYAN + "3. Chỉnh sửa thông tin khóa học" + PURPLE + "             ║");
-            System.out.println("║ " + CYAN + "4. Xóa khóa học (xác nhận trước khi xóa)" + PURPLE + "    ║");
-            System.out.println("║ " + CYAN + "5. Tìm kiếm theo tên (tương đối)" + PURPLE + "            ║");
-            System.out.println("║ " + CYAN + "6. Sắp xếp theo tên hoặc id (tăng/giảm dần)" + PURPLE + " ║");
-            System.out.println("║ " + CYAN + "7. Quay về menu chính" + PURPLE + "                       ║");
-            System.out.println("╚═════════════════════════════════════════════╝" + RESET);
+            System.out.println(PURPLE + "\n╔═══════════════════════════════════════════════════╗");
+            System.out.println("║              " + YELLOW + "QUẢN LÝ KHÓA HỌC" + PURPLE + "                     ║");
+            System.out.println("╠═══════════════════════════════════════════════════╣");
+            System.out.println("║ " + CYAN + "1. Hiển thị danh sách khóa học" + PURPLE + "                    ║");
+            System.out.println("║ " + CYAN + "2. Thêm mới khóa học" + PURPLE + "                              ║");
+            System.out.println("║ " + CYAN + "3. Chỉnh sửa thông tin khóa học" + PURPLE + "                   ║");
+            System.out.println("║ " + CYAN + "4. Xóa khóa học (xác nhận trước khi xóa)" + PURPLE + "          ║");
+            System.out.println("║ " + CYAN + "5. Tìm kiếm theo tên (tương đối)" + PURPLE + "                  ║");
+            System.out.println("║ " + CYAN + "6. Sắp xếp theo tên hoặc id (tăng/giảm dần)" + PURPLE + "       ║");
+            System.out.println("║ " + CYAN + "7. Quay về menu chính" + PURPLE + "                             ║");
+            System.out.println("╚═══════════════════════════════════════════════════╝" + RESET);
             System.out.print(GREEN + "→ Mời bạn chọn chức năng (1-7): " + RESET);
 
             try {
@@ -119,14 +122,19 @@ public class CourseUI {
 
         System.out.println(CYAN + "\nThông tin khóa học:" + RESET);
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        System.out.printf("ID: %d, Tên: %s, Thời lượng: %d, Giảng viên: %s, Ngày tạo: %s\n",
+        System.out.println("┌────────┬─────────────────────┬────────────┬─────────────────────┬──────────────┐");
+        System.out.printf("│ %-6s │ %-19s │ %-10s │ %-19s │ %-12s │\n",
+                "ID", "Tên khóa học", "Thời lượng", "Giảng viên", "Ngày tạo");
+        System.out.println("├────────┼─────────────────────┼────────────┼─────────────────────┼──────────────┤");
+        System.out.printf("│ %-6d │ %-19s │ %-10d │ %-19s │ %-12s │\n",
                 course.getCourseId(), course.getName(), course.getDuration(),
                 course.getInstructor(), course.getCreateAt().format(dtf));
+        System.out.println("└────────┴─────────────────────┴────────────┴─────────────────────┴──────────────┘");
 
         int choice;
         do {
             System.out.println(PURPLE + "\n╔══════════════════════════════════════╗");
-            System.out.println("║ " + CYAN + "Chọn thuộc tính để chỉnh sửa" + PURPLE + "         ║");
+            System.out.println("║ " + CYAN + "    Chọn thuộc tính để chỉnh sửa" + PURPLE + "     ║");
             System.out.println("╠══════════════════════════════════════╣");
             System.out.println("║ " + CYAN + "1. Tên khóa học" + PURPLE + "                      ║");
             System.out.println("║ " + CYAN + "2. Thời lượng" + PURPLE + "                        ║");
@@ -181,9 +189,15 @@ public class CourseUI {
 
         System.out.println(CYAN + "\nThông tin khóa học:" + RESET);
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        System.out.printf("ID: %d, Tên: %s, Thời lượng: %d, Giảng viên: %s, Ngày tạo: %s\n",
+        System.out.println("┌────────┬─────────────────────┬────────────┬─────────────────────┬──────────────┐");
+        System.out.printf("│ %-6s │ %-19s │ %-10s │ %-19s │ %-12s │\n",
+                "ID", "Tên khóa học", "Thời lượng", "Giảng viên", "Ngày tạo");
+        System.out.println("├────────┼─────────────────────┼────────────┼─────────────────────┼──────────────┤");
+        System.out.printf("│ %-6d │ %-19s │ %-10d │ %-19s │ %-12s │\n",
                 course.getCourseId(), course.getName(), course.getDuration(),
                 course.getInstructor(), course.getCreateAt().format(dtf));
+        System.out.println("└────────┴─────────────────────┴────────────┴─────────────────────┴──────────────┘");
+
         System.out.print(YELLOW + "Bạn có chắc chắn muốn xóa khóa học này? (1 để xác nhận, 0 để hủy): " + RESET);
         String confirm;
         try {
@@ -201,7 +215,26 @@ public class CourseUI {
             if (courseService.deleteCourseById(courseId)) {
                 System.out.println(GREEN + "Xóa khóa học thành công!" + RESET);
             } else {
-                System.out.println(RED + "Xóa khóa học thất bại!" + RESET);
+                Connection conn = null;
+                CallableStatement callSt = null;
+                try {
+                    conn = ra.edu.business.config.ConnectionDB.openConnection();
+                    callSt = conn.prepareCall("{CALL delete_course(?, ?, ?)}");
+                    callSt.setInt(1, courseId);
+                    callSt.registerOutParameter(2, java.sql.Types.BIT);
+                    callSt.registerOutParameter(3, java.sql.Types.VARCHAR);
+                    callSt.execute();
+                    boolean success = callSt.getBoolean(2);
+                    String message = callSt.getString(3);
+                    if (!success) {
+                        System.out.println(RED + message + RESET);
+                    }
+                } catch (SQLException e) {
+                    System.out.println(RED + "Xóa khóa học thất bại do lỗi hệ thống!" + RESET);
+                    e.printStackTrace();
+                } finally {
+                    ra.edu.business.config.ConnectionDB.closeConnection(conn, callSt, null);
+                }
             }
         } else {
             System.out.println(YELLOW + "Hủy xóa khóa học." + RESET);
@@ -233,11 +266,11 @@ public class CourseUI {
         String field = "";
         do {
             System.out.println(PURPLE + "\n╔═══════════════════════════════╗");
-            System.out.println("║ " + CYAN + "Chọn tiêu chí sắp xếp" + PURPLE + "         ║");
+            System.out.println("║ " + CYAN + "Chọn tiêu chí sắp xếp" + PURPLE + "       ║");
             System.out.println("╠═══════════════════════════════╣");
-            System.out.println("║ " + CYAN + "1. Theo tên khóa học" + PURPLE + "           ║");
-            System.out.println("║ " + CYAN + "2. Theo ID khóa học" + PURPLE + "            ║");
-            System.out.println("║ " + CYAN + "3. Quay lại" + PURPLE + "                    ║");
+            System.out.println("║ " + CYAN + "1. Theo tên khóa học" + PURPLE + "         ║");
+            System.out.println("║ " + CYAN + "2. Theo ID khóa học" + PURPLE + "          ║");
+            System.out.println("║ " + CYAN + "3. Quay lại" + PURPLE + "                  ║");
             System.out.println("╚═══════════════════════════════╝" + RESET);
             System.out.print(GREEN + "→ Mời bạn chọn (1-3): " + RESET);
 
@@ -266,11 +299,11 @@ public class CourseUI {
         String order = "";
         do {
             System.out.println(PURPLE + "\n╔═══════════════════════════════╗");
-            System.out.println("║ " + CYAN + "Chọn thứ tự sắp xếp" + PURPLE + "           ║");
+            System.out.println("║ " + CYAN + "Chọn thứ tự sắp xếp" + PURPLE + "         ║");
             System.out.println("╠═══════════════════════════════╣");
-            System.out.println("║ " + CYAN + "1. Tăng dần" + PURPLE + "                    ║");
-            System.out.println("║ " + CYAN + "2. Giảm dần" + PURPLE + "                    ║");
-            System.out.println("║ " + CYAN + "3. Quay lại" + PURPLE + "                    ║");
+            System.out.println("║ " + CYAN + "1. Tăng dần" + PURPLE + "                  ║");
+            System.out.println("║ " + CYAN + "2. Giảm dần" + PURPLE + "                  ║");
+            System.out.println("║ " + CYAN + "3. Quay lại" + PURPLE + "                  ║");
             System.out.println("╚═══════════════════════════════╝" + RESET);
             System.out.print(GREEN + "→ Mời bạn chọn (1-3): " + RESET);
 
@@ -311,30 +344,31 @@ public class CourseUI {
             System.out.println(YELLOW + "Không có khóa học nào ở trang " + page + "." + RESET);
         } else {
             System.out.println(CYAN + "\n" + title + " (Trang " + page + "/" + totalPages + "):" + RESET);
-            System.out.println("----------------------------------------------------------------------");
-            System.out.printf("%-10s %-20s %-10s %-20s %-15s\n",
+            System.out.println("┌────────┬─────────────────────┬────────────┬─────────────────────┬──────────────┐");
+            System.out.printf("│ %-6s │ %-19s │ %-10s │ %-19s │ %-12s │\n",
                     "ID", "Tên khóa học", "Thời lượng", "Giảng viên", "Ngày tạo");
-            System.out.println("----------------------------------------------------------------------");
+            System.out.println("├────────┼─────────────────────┼────────────┼─────────────────────┼──────────────┤");
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
             for (Course course : courses) {
-                System.out.printf("%-10d %-20s %-10d %-20s %-15s\n",
+                System.out.printf("│ %-6d │ %-19s │ %-10d │ %-19s │ %-12s │\n",
                         course.getCourseId(),
                         course.getName(),
                         course.getDuration(),
                         course.getInstructor(),
                         course.getCreateAt().format(dtf));
             }
-            System.out.println("----------------------------------------------------------------------");
-        }
-        System.out.print(YELLOW + "Trang: ");
-        for (int i = 1; i <= totalPages; i++) {
-            if (i == page) {
-                System.out.print("[" + i + "] ");
-            } else {
-                System.out.print(i + " ");
+            System.out.println("└────────┴─────────────────────┴────────────┴─────────────────────┴──────────────┘");
+
+            System.out.print(YELLOW + "Trang: ");
+            for (int i = 1; i <= totalPages; i++) {
+                if (i == page) {
+                    System.out.print("[" + i + "] ");
+                } else {
+                    System.out.print(i + " ");
+                }
             }
+            System.out.println(RESET);
         }
-        System.out.println(RESET);
     }
 
     private static int handlePaginationInput(int currentPage, int totalPages) {

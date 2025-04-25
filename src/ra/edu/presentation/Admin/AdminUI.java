@@ -1,13 +1,15 @@
 package ra.edu.presentation.Admin;
 
 import ra.edu.presentation.Course.CourseUI;
+import ra.edu.presentation.Enrollment.EnrollmentUI;
+import ra.edu.presentation.Statistic.StatisticUI;
+import ra.edu.presentation.Student.ManagementStudentUI;
 
 import java.util.Scanner;
 
 public class AdminUI {
     private static final Scanner scanner = new Scanner(System.in);
 
-    // Mã màu ANSI
     public static final String RESET = "\u001B[0m";
     public static final String BLUE = "\u001B[34m";
     public static final String CYAN = "\u001B[36m";
@@ -38,13 +40,16 @@ public class AdminUI {
                     CourseUI.displayCourseUI();
                     break;
                 case 2:
-                    System.out.println(BLUE + "🔧 Đang phát triển chức năng quản lý học viên..." + RESET);
+                    System.out.println(BLUE + "🔧 Đang mở giao diện quản lý học viên..." + RESET);
+                    ManagementStudentUI.displayStudentManagementUI();
                     break;
                 case 3:
-                    System.out.println(BLUE + "🔧 Đang phát triển chức năng quản lý đăng ký học..." + RESET);
+                    System.out.println(BLUE + "🔧 Đang mở giao diện quản lý đăng ký học..." + RESET);
+                    EnrollmentUI.displayEnrollmentMenu();
                     break;
                 case 4:
-                    System.out.println(BLUE + "📈 Đang phát triển chức năng thống kê học viên..." + RESET);
+                    System.out.println(BLUE + "📈 Đang mở giao diện thống kê học viên..." + RESET);
+                    StatisticUI.displayStatisticMenu();
                     break;
                 case 5:
                     System.out.println(YELLOW + "✅ Đã đăng xuất. Quay lại màn hình chính..." + RESET);

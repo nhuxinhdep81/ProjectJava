@@ -61,18 +61,16 @@ public class MainApplication {
 
     private static void registerStudent() {
         System.out.println(CYAN + "\nĐăng ký tài khoản Học viên:" + RESET);
-        String name = StudentValidator.validateName(sc);
+        String name = StudentValidator.validateStudentName(sc);
         LocalDate dob = StudentValidator.validateDob(sc);
-        String email = StudentValidator.validateEmail(sc);
+        String email = StudentValidator.validateEmail(sc, 0); // Đăng ký mới, studentId = 0
         boolean sex = StudentValidator.validateSex(sc);
         String phone = StudentValidator.validatePhone(sc);
         String password = StudentValidator.validatePassword(sc);
 
         Student student = new Student(0, name, dob, email, sex, phone, password, LocalDate.now(), true);
         if (authService.registerStudent(student)) {
-            System.out.println(GREEN + "Đăng ký tài khoản thành công! Bạn có thể đăng nhập ngay." + RESET);
-        } else {
-            System.out.println(RED + "Đăng ký thất bại! Email có thể đã tồn tại." + RESET);
+            System.out.println(GREEN + "✔ Đăng ký tài khoản thành công! Bạn có thể đăng nhập ngay." + RESET);
         }
     }
 }
