@@ -307,6 +307,31 @@ BEGIN
     END IF;
 END //
 
+CREATE PROCEDURE get_enrollments_by_student_sorted_pagination(
+    IN p_student_id INT,
+    IN p_field VARCHAR(50),      -- Trường để sắp xếp: 'course_name' hoặc 'registered_at'
+    IN p_order VARCHAR(10),      -- Thứ tự sắp xếp: 'ASC' hoặc 'DESC'
+    IN p_page INT                -- Trang hiện tại (bắt đầu từ 1)
+)
+BEGIN
+    DECLARE v_offset INT;
+    SET v_offset = (p_page - 1) * 5;  -- Mỗi trang 5 bản ghi
+
+    SET @sql = CONCAT(
+            'SELECT e.id, e.student_id, e.course_id, c.name AS course_name, e.registered_at, e.status ',
+            'FROM enrollment e ',
+            'JOIN course c ON e.course_id = c.course_id ',
+            'WHERE e.student_id = ? AND e.status IN (''Waiting'', ''Active'') ',
+            'ORDER BY ', p_field, ' ', p_order, ' ',
+            'LIMIT 5 OFFSET ?'
+               );
+
+    PREPARE stmt FROM @sql;
+    SET @student_id = p_student_id;
+    SET @offset = v_offset;
+    EXECUTE stmt USING @student_id, @offset;
+    DEALLOCATE PREPARE stmt;
+END //
 
 -- check trung email cho dki học viện, thêm học viên cũng như cập nhật học viên
 

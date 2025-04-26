@@ -33,7 +33,7 @@ public class ManagementStudentUI {
             System.out.println("│ " + CYAN + "1. Hiển thị danh sách học viên        " + PURPLE + " │");
             System.out.println("│ " + CYAN + "2. Thêm mới học viên                  " + PURPLE + " │");
             System.out.println("│ " + CYAN + "3. Chỉnh sửa thông tin học viên       " + PURPLE + " │");
-            System.out.println("│ " + CYAN + "4. Vô hiệu hóa học viên               " + PURPLE + " │");
+            System.out.println("│ " + CYAN + "4. Xoá học viên               " + PURPLE + "         │");
             System.out.println("│ " + CYAN + "5. Tìm kiếm theo tên, email, ID       " + PURPLE + " │");
             System.out.println("│ " + CYAN + "6. Sắp xếp theo tên hoặc ID           " + PURPLE + " │");
             System.out.println("│ " + CYAN + "7. Quay về menu chính                 " + PURPLE + " │");
@@ -116,6 +116,10 @@ public class ManagementStudentUI {
             System.out.println(RED + "❌ Không tìm thấy học viên với ID " + studentId + "!" + RESET);
             return;
         }
+        if (!student.isActived()) {
+            System.out.println(RED + "❌ Học viên đã bị vô hiệu hóa!" + RESET);
+            return;
+        }
 
         System.out.println(CYAN + "\nThông tin học viên:" + RESET);
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -123,7 +127,7 @@ public class ManagementStudentUI {
         System.out.printf("│ %-2s │ %-18s │ %-10s │ %-23s │ %-8s│ %-12s │ %-10s │ %-8s      │%n",
                 "ID", "Tên", "Ngày sinh", "Email", "Giới tính", "Điện thoại", "Ngày tạo", "Trạng thái");
         System.out.println("├────┼────────────────────┼────────────┼─────────────────────────┼──────────┼──────────────┼────────────┼─────────────────┤");
-        System.out.printf("│ %-2d │ %-18.18s │ %-10s │ %-23.23s │ %-8s │ %-12s │ %-10s │ %-8s      │%n",
+        System.out.printf("│ %-2d │ %-18.18s │ %-10s │ %-23.23s │ %-8s │ %-12s │ %-10s │ %-8s  │%n",
                 student.getStudentId(),
                 student.getName(),
                 student.getDob().format(dtf),
@@ -185,7 +189,7 @@ public class ManagementStudentUI {
     }
 
     private static void disableStudent() {
-        System.out.println(CYAN + "\n⛔ Vô hiệu hóa học viên:" + RESET);
+        System.out.println(CYAN + "\n⛔ Xoá học viên:" + RESET);
         System.out.print("Nhập ID học viên: ");
         int studentId;
         try {
@@ -206,10 +210,21 @@ public class ManagementStudentUI {
 
         System.out.println(CYAN + "\nThông tin học viên:" + RESET);
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        System.out.printf("ID: %d | Tên: %s | Ngày sinh: %s | Email: %s | Giới tính: %s | SĐT: %s | Ngày tạo: %s | Trạng thái: %s\n",
-                student.getStudentId(), student.getName(), student.getDob().format(dtf), student.getEmail(),
-                student.isSex() ? "Nam" : "Nữ", student.getPhone() != null ? student.getPhone() : "N/A", student.getCreateAt().format(dtf),
-                student.isActived() ? "Kích hoạt" : "Vô hiệu hóa");
+        System.out.println("┌────┬────────────────────┬────────────┬─────────────────────────┬──────────┬──────────────┬────────────┬─────────────────┐");
+        System.out.printf("│ %-2s │ %-18s │ %-10s │ %-23s │ %-8s│ %-12s │ %-10s │ %-8s      │%n",
+                "ID", "Tên", "Ngày sinh", "Email", "Giới tính", "Điện thoại", "Ngày tạo", "Trạng thái");
+        System.out.println("├────┼────────────────────┼────────────┼─────────────────────────┼──────────┼──────────────┼────────────┼─────────────────┤");
+        System.out.printf("│ %-2d │ %-18.18s │ %-10s │ %-23.23s │ %-8s │ %-12s │ %-10s │ %-8s  │%n",
+                student.getStudentId(),
+                student.getName(),
+                student.getDob().format(dtf),
+                student.getEmail(),
+                student.isSex() ? "Nam" : "Nữ",
+                student.getPhone() != null ? student.getPhone() : "N/A",
+                student.getCreateAt().format(dtf),
+                student.isActived() ? "Đang hoạt động" : "Vô hiệu hoá");
+        System.out.println("└────┴────────────────────┴────────────┴─────────────────────────┴──────────┴──────────────┴────────────┴─────────────────┘");
+
         System.out.print(YELLOW + "⚠ Bạn có chắc muốn vô hiệu hóa? (1: Có, 0: Không): " + RESET);
         String confirm;
         try {

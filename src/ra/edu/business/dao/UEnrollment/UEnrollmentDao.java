@@ -11,4 +11,6 @@ public interface UEnrollmentDao extends AppDao<Enrollment> {
     int countEnrollmentsByStudent(int studentId);
     List<Enrollment> getWaitingEnrollmentsByStudent(int studentId);
     boolean cancelEnrollment(int enrollmentId, int studentId);
+    List<Enrollment> getEnrollmentsByStudentSorted(int studentId, String field, String order, int page);
+
 }
